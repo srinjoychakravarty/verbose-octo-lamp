@@ -54,6 +54,19 @@ def login():
   token = Auth.generate_token(ser_data.get('id'))
   return custom_response({'jwt_token': token}, 200)
 
+# user can get any other user via their id (might need to be removed)
+@user_api.route('/<int:user_id>', methods = ['GET'])
+@Auth.auth_required
+def get_a_user(user_id):
+  """
+  Get a single user
+  """
+  user = UserModel.get_one_user(user_id)
+  if not user:
+    return custom_response({'error': 'user not found'}, 404)
+  ser_user = user_schema.dump(user).data
+  return custom_response(ser_user, 200)
+
 def custom_response(res, status_code):
   """
   Custom Response Function
