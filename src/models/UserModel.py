@@ -38,14 +38,6 @@ class UserModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  # add this new method
-  def __generate_hash(self, password):
-    return bcrypt.generate_password_hash(password, rounds=10).decode("utf-8")
-
-  # add this new method
-  def check_hash(self, password):
-    return bcrypt.check_password_hash(self.password, password)
-
   def update(self, data):
     for key, item in data.items():
       if key == 'password': # add this new line
@@ -65,6 +57,33 @@ class UserModel(db.Model):
   @staticmethod
   def get_one_user(id):
     return UserModel.query.get(id)
+
+  @staticmethod
+  def get_user_by_email(value):
+    return UserModel.query.filter_by(email = value).first()
+
+
+  # add this new method
+  def __generate_hash(self, password):
+    return bcrypt.generate_password_hash(password, rounds=10).decode("utf-8")
+
+  # add this new method
+  def check_hash(self, password):
+    return bcrypt.check_password_hash(self.password, password)
+
+  # def __generate_hash(self, password):
+  #   # salt = bcrypt.gensalt(16)
+  #   salt = bcrypt.gensalt(rounds = 16)
+  #   hashed_password_digest = bcrypt.hashpw(password, salt)
+  #   return hashed_password_digest.decode("utf-8")
+
+ # @password.setter
+ #    def password(self, password):
+ #        self.password_hash = bcrypt.hashpw('password', bcrypt.gensalt()))
+ #        # or whatever other hashing function you like.
+
+# def verify_password(self, password)
+#     return some_check_hash_func(self.password_hash, password)
 
   def __repr(self):
     return '<id {}>'.format(self.id)
