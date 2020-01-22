@@ -67,6 +67,16 @@ def get_a_user(user_id):
   ser_user = user_schema.dump(user).data
   return custom_response(ser_user, 200)
 
+@user_api.route('/self', methods = ['GET'])
+@Auth.auth_required
+def get_self():
+  """
+  Get self
+  """
+  user = UserModel.get_one_user(g.user.get('id'))
+  ser_user = user_schema.dump(user).data
+  return custom_response(ser_user, 200)
+
 def custom_response(res, status_code):
   """
   Custom Response Function
