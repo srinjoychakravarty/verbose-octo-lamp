@@ -4,16 +4,18 @@ from marshmallow import fields, Schema
 import datetime
 from . import db, bcrypt
 from .BlogpostModel import BlogpostSchema
+from uuid import uuid4
+# import sqlalchemy
+# from sqlalchemy.dialects.postgresql import UUID
 
 class UserModel(db.Model):
   """
   User Model
   """
-
-  # table name
   __tablename__ = 'users'
-
-  id = db.Column(db.Integer, primary_key = True)
+  # id = db.Column(UUID(as_uuid = True), primary_key = True, default = uuid4)
+  # id = db.Column(UUID(as_uuid = True), primary_key=True, server_default = sqlalchemy.text("uuid_generate_v4()"))
+  id = db.Column(db.String(128), primary_key = True, default = uuid4)
   first_name = db.Column(db.String(128), nullable = False)
   last_name = db.Column(db.String(128), nullable = False)
   email_address = db.Column(db.String(128), unique = True, nullable = False)
@@ -67,3 +69,12 @@ class UserModel(db.Model):
 
   def __repr(self):
     return '<id {}>'.format(self.id)
+
+# add this class
+class UserSchema(Schema):
+  id = fields.Int(dump_only = True)
+  first_name = fields.Str(required = True)
+  email_address = fields.Email(required = True)
+  password = fields.Str(required = True, load_only = True)
+  account_created = fields.DateTime(dump_only = True)
+  account_updated = fields.DateTime(dump_only = True)
