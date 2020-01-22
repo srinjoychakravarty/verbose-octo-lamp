@@ -77,6 +77,21 @@ def get_self():
   ser_user = user_schema.dump(user).data
   return custom_response(ser_user, 200)
 
+@user_api.route('/self', methods = ['PUT'])
+@Auth.auth_required
+def update():
+  """
+  Update self
+  """
+  req_data = request.get_json()
+  data, error = user_schema.load(req_data, partial = True)
+  if error:
+    return custom_response(error, 400)
+  user = UserModel.get_one_user(g.user.get('id'))
+  user.update(data)
+  ser_user = user_schema.dump(user).data
+  return custom_response(ser_user, 200)
+
 def custom_response(res, status_code):
   """
   Custom Response Function
