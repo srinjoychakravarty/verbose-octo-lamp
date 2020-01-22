@@ -7,3 +7,5 @@ from flask_sqlalchemy import SQLAlchemy
 # initialize our db
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+
+from .UserModel import UserModel, UserSchema

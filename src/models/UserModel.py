@@ -3,7 +3,6 @@
 from marshmallow import fields, Schema
 import datetime
 from . import db, bcrypt
-from .BlogpostModel import BlogpostSchema
 from uuid import uuid4
 # import sqlalchemy
 # from sqlalchemy.dialects.postgresql import UUID
