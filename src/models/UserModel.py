@@ -27,6 +27,7 @@ class UserModel(db.Model):
     """
     Class constructor
     """
+    self.id = data.get('id')
     self.first_name = data.get('first_name')
     self.last_name = data.get('last_name')
     self.email_address = data.get('email_address')

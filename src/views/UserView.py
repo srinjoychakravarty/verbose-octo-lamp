@@ -3,6 +3,7 @@
 from flask import request, json, Response, Blueprint, g
 from ..models.UserModel import UserModel, UserSchema
 from ..shared.Authentication import Auth
+import uuid
 
 user_api = Blueprint('user_api', __name__)
 user_schema = UserSchema()
@@ -13,18 +14,18 @@ def create():
   Create User Function
   """
   req_data = request.get_json()
-  print(req_data)
   data = user_schema.load(req_data)
   # check if user already exist in the db
-  user_in_db = UserModel.get_user_by_email(data.get('email_address'))
-  #user_in_db = UserModel.get_user_by_email(data.get('email_address'))
-  if user_in_db:
+  if UserModel.get_user_by_email(data.get('email_address')):
     message = {'error': 'User already exist, please supply another email address'}
     return custom_response(message, 400)
+  new_uuid = uuid.uuid4()
+  data.update({'id': str(new_uuid)})
   user = UserModel(data)
   user.save()
+
   # change jwt token to basic authentication
-  ser_data = user_schema.dump(user).data
+  ser_data = user_schema.dump(user)
   # generate basic auth token and return as res below ???
   token = Auth.generate_token(ser_data.get('id'))
   return custom_response({'jwt_token': token}, 201)
