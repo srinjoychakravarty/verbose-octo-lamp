@@ -2,9 +2,8 @@
 
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from .UserModel import UserModel, UserSchema
+# from .UserModel import UserModel, UserSchema
 
 # initialize our db
 db = SQLAlchemy()
-
 bcrypt = Bcrypt()

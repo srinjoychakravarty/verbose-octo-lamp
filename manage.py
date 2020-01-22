@@ -1,4 +1,4 @@
-# /src/manage.py
+# /manage.py
 
 import os
 from flask_script import Manager
