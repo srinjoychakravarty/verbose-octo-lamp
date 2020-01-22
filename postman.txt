@@ -1,0 +1,35 @@
+Create User POST http://127.0.0.1:5000/v1/user/
+
+{
+	"first_name": "Maeve",
+	"last_name": "Wiley",
+	"email_address": "maeve@wiley.com",
+	"password": "mavely123"
+}
+
+{
+	"first_name": "Tanaji",
+	"last_name": "James",
+	"email_address": "xchakravarty@gmail.com",
+	"password": "srinjoy93"
+}
+
+{
+    "jwt_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1Nzk4MTUzNzYsImlhdCI6MTU3OTcyODk3Niwic3ViIjoiMGRmNDBjYWQtN2UyZC00MWIzLWJhNWMtNTVlNTA3Njc5YjFjIn0.qsLqlV9ovapSkTOh5rG8HTR1HVGnroTvbQS54DaiqcY"
+}
+
+                  eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1Nzk4MTU3OTgsImlhdCI6MTU3OTcyOTM5OCwic3ViIjoiMGRmNDBjYWQtN2UyZC00MWIzLWJhNWMtNTVlNTA3Njc5YjFjIn0.x6iCr9cU3zCt8BYYttxNtYRomW_Rsx4bYPoS5UPhJsM
+
+Login POST http://127.0.0.1:5000/v1/user/login
+{
+	"email_address": "maeve@wiley.com",
+	"password": "mavely123"
+}
+
+Login POST http://127.0.0.1:5000/v1/user/login
+{
+	"email_address": "xchakravarty@gmail.com",
+	"password": "srinjoy93"
+}
+
+Get Self GET http://127.0.0.1:5000/v1/user/self

@@ -23,7 +23,6 @@ def create():
   data.update({'id': str(new_uuid)})
   user = UserModel(data)
   user.save()
-
   # change jwt token to basic authentication
   ser_data = user_schema.dump(user)
   # generate basic auth token and return as res below ???
@@ -38,7 +37,7 @@ def get_all():
   Get all users
   """
   users = UserModel.get_all_users()
-  ser_users = user_schema.dump(users, many = True).data
+  ser_users = user_schema.dump(users, many = True)
   return custom_response(ser_users, 200)
 
 # user can get any other user via their id (might need to be removed)
@@ -51,7 +50,7 @@ def get_a_user(user_id):
   user = UserModel.get_one_user(user_id)
   if not user:
     return custom_response({'error': 'user not found'}, 404)
-  ser_user = user_schema.dump(user).data
+  ser_user = user_schema.dump(user)
   return custom_response(ser_user, 200)
 
 @user_api.route('/self', methods = ['GET'])
@@ -61,7 +60,7 @@ def get_self():
   Get self
   """
   user = UserModel.get_one_user(g.user.get('id'))
-  ser_user = user_schema.dump(user).data
+  ser_user = user_schema.dump(user)
   return custom_response(ser_user, 200)
 
 @user_api.route('/self', methods = ['PUT'])
@@ -71,12 +70,10 @@ def update():
   Update self
   """
   req_data = request.get_json()
-  data, error = user_schema.load(req_data, partial = True)
-  if error:
-    return custom_response(error, 400)
+  data = user_schema.load(req_data, partial = True)
   user = UserModel.get_one_user(g.user.get('id'))
   user.update(data)
-  ser_user = user_schema.dump(user).data
+  ser_user = user_schema.dump(user)
   return custom_response(ser_user, 200)
 
 @user_api.route('/self', methods = ['DELETE'])
@@ -96,17 +93,13 @@ def login():
   """
   req_data = request.get_json()
   data = user_schema.load(req_data, partial = True)
-
   if not data.get('email_address') or not data.get('password'):
     return custom_response({'error': 'you need email and password to sign in'}, 400)
-
   user = UserModel.get_user_by_email(data.get('email_address'))
   if not user:
     return custom_response({'error': 'user does not exist for given email address'}, 400)
-
   if not user.check_hash(data.get('password')):
     return custom_response({'error': 'invalid credentials: password does not match'}, 400)
-
   ser_data = user_schema.dump(user)
   token = Auth.generate_token(ser_data.get('id'))
   return custom_response({'jwt_token': token}, 200)
