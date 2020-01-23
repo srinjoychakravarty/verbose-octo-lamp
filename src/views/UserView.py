@@ -70,11 +70,16 @@ def update():
   Update self
   """
   req_data = request.get_json()
-  data = user_schema.load(req_data, partial = True)
-  user = UserModel.get_one_user(g.user.get('id'))
-  user.update(data)
-  ser_user = user_schema.dump(user)
-  return custom_response(ser_user, 200)
+  update_attempt_list = list(req_data.keys())
+  if ("account_updated" in update_attempt_list or "email_address" in update_attempt_list or "account_created" in update_attempt_list):
+      return custom_response({'error': 'you cant update email address or tamper with timestamps'}, 400)
+  else:
+      data = user_schema.load(req_data, partial = True)
+      user = UserModel.get_one_user(g.user.get('id'))
+      user.update(data)
+      ser_user = user_schema.dump(user)
+      return custom_response(ser_user, 200)
+
 
 @user_api.route('/self', methods = ['DELETE'])
 @Auth.auth_required

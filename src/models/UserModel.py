@@ -41,18 +41,14 @@ class UserModel(db.Model):
 
   def update(self, data):
     for key, item in data.items():
-      if key == 'password': # add this new line
-        # self.password = self.__generate_hash(value) # add this new line
-        print(item)
-        hashed_password = self.__generate_hash(item)
-        print(hashed_password)
-        self.password = hashed_password # add this new line
-        # self.password = self.__generate_hash(item) # add this new line
-        # setattr(self, key, item)
-      else:
-        setattr(self, key, item)
-    self.modified_at = datetime.datetime.utcnow()
-    db.session.commit()
+       if (key not in ['email_address', 'account_created', 'account_updated']):
+          if key == 'password':
+            hashed_password = self.__generate_hash(item)
+            self.password = hashed_password
+          else:
+            setattr(self, key, item)
+          self.modified_at = datetime.datetime.utcnow()
+          db.session.commit()
 
   def delete(self):
     db.session.delete(self)
