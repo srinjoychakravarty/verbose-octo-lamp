@@ -69,7 +69,7 @@ class UserModel(db.Model):
 
   # add this new method
   def __generate_hash(self, password):
-    return bcrypt.generate_password_hash(password, rounds=10)
+    return bcrypt.generate_password_hash(password, rounds = 16)
 
   # add this new method
   def check_hash(self, password):

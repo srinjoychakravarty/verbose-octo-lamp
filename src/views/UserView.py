@@ -3,7 +3,7 @@
 from flask import request, json, Response, Blueprint, g
 from ..models.UserModel import UserModel, UserSchema
 from ..shared.Authentication import Auth
-import uuid
+import re, uuid
 
 user_api = Blueprint('user_api', __name__)
 user_schema = UserSchema()
@@ -19,39 +19,62 @@ def create():
   if UserModel.get_user_by_email(data.get('email_address')):
     message = {'error': 'User already exist, please supply another email address'}
     return custom_response(message, 400)
-  new_uuid = uuid.uuid4()
-  data.update({'id': str(new_uuid)})
-  user = UserModel(data)
-  user.save()
-  # change jwt token to basic authentication
-  ser_data = user_schema.dump(user)
-  # generate basic auth token and return as res below ???
-  token = Auth.generate_token(ser_data.get('id'))
-  return custom_response({'jwt_token': token}, 201)
 
-# add this new method
-@user_api.route('/', methods = ['GET'])
-@Auth.auth_required
-def get_all():
-  """
-  Get all users
-  """
-  users = UserModel.get_all_users()
-  ser_users = user_schema.dump(users, many = True)
-  return custom_response(ser_users, 200)
+  attempted_password = data.get('password')
+  SpecialSym =['$', '@', '#', '%', '!', '^', '&', '*', '(', ')']
+  password_error = ''
+  val = True
+  if len(attempted_password) < 9:
+      val = False
+      password_error = 'password shorter than 9 characters'
+  elif not any(char.isdigit() for char in attempted_password):
+      password_error = 'Password should have at least one numeral'
+      val = False
+  elif not any(char.isupper() for char in attempted_password):
+      password_error = 'Password should have at least one uppercase letter'
+      val = False
+  elif not any(char.islower() for char in attempted_password):
+      password_error = 'Password should have at least one lowercase letter'
+      val = False
+  elif not any(char in SpecialSym for char in attempted_password):
+      password_error = 'Password should have at least one of the symbols $ @ # % ! ^ & * ( )'
+      val = False
+  if val:
+      new_uuid = uuid.uuid4()
+      data.update({'id': str(new_uuid)})
+      user = UserModel(data)
+      user.save()
+      # change jwt token to basic authentication
+      ser_data = user_schema.dump(user)
+      # generate basic auth token and return as res below ???
+      token = Auth.generate_token(ser_data.get('id'))
+      return custom_response({'jwt_token': token}, 201)
+  else:
+      return custom_response({'error': password_error}, 400)
 
-# user can get any other user via their id (might need to be removed)
-@user_api.route('/<int:user_id>', methods = ['GET'])
-@Auth.auth_required
-def get_a_user(user_id):
-  """
-  Get a single user
-  """
-  user = UserModel.get_one_user(user_id)
-  if not user:
-    return custom_response({'error': 'user not found'}, 404)
-  ser_user = user_schema.dump(user)
-  return custom_response(ser_user, 200)
+# # add this new method
+# @user_api.route('/all', methods = ['GET'])
+# @Auth.auth_required
+# def get_all():
+#   """
+#   Get all users
+#   """
+#   users = UserModel.get_all_users()
+#   ser_users = user_schema.dump(users, many = True)
+#   return custom_response(ser_users, 200)
+
+# # user can get any other user via their id (might need to be removed)
+# @user_api.route('/<int:user_id>', methods = ['GET'])
+# @Auth.auth_required
+# def get_a_user(user_id):
+#   """
+#   Get a single user
+#   """
+#   user = UserModel.get_one_user(user_id)
+#   if not user:
+#     return custom_response({'error': 'user not found'}, 404)
+#   ser_user = user_schema.dump(user)
+#   return custom_response(ser_user, 200)
 
 @user_api.route('/self', methods = ['GET'])
 @Auth.auth_required
