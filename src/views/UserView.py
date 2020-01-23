@@ -5,6 +5,11 @@ from ..models.UserModel import UserModel, UserSchema
 from ..shared.Authentication import Auth
 import re, uuid
 
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
+
+auth = HTTPBasicAuth()
+
 user_api = Blueprint('user_api', __name__)
 user_schema = UserSchema()
 
@@ -14,43 +19,58 @@ def create():
   Create User Function
   """
   req_data = request.get_json()
-  data = user_schema.load(req_data)
-  # check if user already exist in the db
-  if UserModel.get_user_by_email(data.get('email_address')):
-    message = {'error': 'User already exist, please supply another email address'}
-    return custom_response(message, 400)
-
-  attempted_password = data.get('password')
-  SpecialSym =['$', '@', '#', '%', '!', '^', '&', '*', '(', ')']
-  password_error = ''
-  val = True
-  if len(attempted_password) < 9:
-      val = False
-      password_error = 'password shorter than 9 characters'
-  elif not any(char.isdigit() for char in attempted_password):
-      password_error = 'Password should have at least one numeral'
-      val = False
-  elif not any(char.isupper() for char in attempted_password):
-      password_error = 'Password should have at least one uppercase letter'
-      val = False
-  elif not any(char.islower() for char in attempted_password):
-      password_error = 'Password should have at least one lowercase letter'
-      val = False
-  elif not any(char in SpecialSym for char in attempted_password):
-      password_error = 'Password should have at least one of the symbols $ @ # % ! ^ & * ( )'
-      val = False
-  if val:
-      new_uuid = uuid.uuid4()
-      data.update({'id': str(new_uuid)})
-      user = UserModel(data)
-      user.save()
-      # change jwt token to basic authentication
-      ser_data = user_schema.dump(user)
-      # generate basic auth token and return as res below ???
-      token = Auth.generate_token(ser_data.get('id'))
-      return custom_response({'jwt_token': token}, 201)
+  # data = user_schema.load(req_data)
+  # Verify non-email username cannot be used for account creation
+  valid_email = True
+  email_error = ''
+  attempted_email = req_data.get('email_address')
+  if len(attempted_email) < 7:
+    valid_email = False
+    email_error = 'email shorter than 7 characters'
+  elif re.match("^.+@(\[?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$", attempted_email) == None:
+    valid_email = False
+    email_error = 'please use a standard email convention'
+  if valid_email:
+      if UserModel.get_user_by_email(attempted_email):
+        # check if user already exist in the db
+        message = {'error': 'User already exist, please supply another email address'}
+        return custom_response(message, 400)
+      # Verify that weak passwords cannot be used to create account
+      attempted_password = req_data.get('password')
+      SpecialSym =['$', '@', '#', '%', '!', '^', '&', '*', '(', ')']
+      password_error = ''
+      valid_password = True
+      if len(attempted_password) < 9:
+          valid_password = False
+          password_error = 'password shorter than 9 characters'
+      elif not any(char.isdigit() for char in attempted_password):
+          password_error = 'Password should have at least one numeral'
+          valid_password = False
+      elif not any(char.isupper() for char in attempted_password):
+          password_error = 'Password should have at least one uppercase letter'
+          valid_password = False
+      elif not any(char.islower() for char in attempted_password):
+          password_error = 'Password should have at least one lowercase letter'
+          valid_password = False
+      elif not any(char in SpecialSym for char in attempted_password):
+          password_error = 'Password should have at least one of the symbols $ @ # % ! ^ & * ( )'
+          valid_password = False
+      if valid_password:
+          new_uuid = uuid.uuid4()
+          data = user_schema.load(req_data)
+          data.update({'id': str(new_uuid)})
+          user = UserModel(data)
+          user.save()
+          # change jwt token to basic authentication
+          ser_data = user_schema.dump(user)
+          # generate basic auth token and return as res below ???
+          token = Auth.generate_token(ser_data.get('id'))
+          return custom_response({'jwt_token': token}, 201)
+      else:
+          return custom_response({'error': password_error}, 400)
   else:
-      return custom_response({'error': password_error}, 400)
+      return custom_response({'error': email_error}, 400)
+
 
 # # add this new method
 # @user_api.route('/all', methods = ['GET'])
