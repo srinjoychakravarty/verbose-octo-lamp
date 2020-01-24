@@ -27,11 +27,9 @@ class Production(Config):
     DEBUG = False
     TESTING = False
 
-
-
-
-
 app_config = {
     'development': Development,
     'production': Production,
+    'testing': Testing,
+    'staging': Staging
 }
