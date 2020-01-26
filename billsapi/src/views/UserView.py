@@ -19,7 +19,9 @@ def create():
   Create User Function
   """
   req_data = request.get_json()
-  # data = user_schema.load(req_data)
+  print("WHAT ON EARTH IS")
+  print(req_data)
+  print("REQUEST FUCKONG DATA")
   # Verify non-email username cannot be used for account creation
   valid_email = True
   email_error = ''
@@ -71,30 +73,28 @@ def create():
   else:
       return custom_response({'error': email_error}, 400)
 
-
-# # add this new method
-# @user_api.route('/all', methods = ['GET'])
+@user_api.route('/all', methods = ['GET'])
 # @Auth.auth_required
-# def get_all():
-#   """
-#   Get all users
-#   """
-#   users = UserModel.get_all_users()
-#   ser_users = user_schema.dump(users, many = True)
-#   return custom_response(ser_users, 200)
+def get_all():
+  """
+  Get all users
+  """
+  users = UserModel.get_all_users()
+  ser_users = user_schema.dump(users, many = True)
+  return custom_response(ser_users, 200)
 
-# # user can get any other user via their id (might need to be removed)
-# @user_api.route('/<int:user_id>', methods = ['GET'])
-# @Auth.auth_required
-# def get_a_user(user_id):
-#   """
-#   Get a single user
-#   """
-#   user = UserModel.get_one_user(user_id)
-#   if not user:
-#     return custom_response({'error': 'user not found'}, 404)
-#   ser_user = user_schema.dump(user)
-#   return custom_response(ser_user, 200)
+# user can get any other user via their id (might need to be removed)
+@user_api.route('/<int:user_id>', methods = ['GET'])
+@Auth.auth_required
+def get_a_user(user_id):
+  """
+  Get a single user
+  """
+  user = UserModel.get_one_user(user_id)
+  if not user:
+    return custom_response({'error': 'user not found'}, 404)
+  ser_user = user_schema.dump(user)
+  return custom_response(ser_user, 200)
 
 @user_api.route('/self', methods = ['GET'])
 @Auth.auth_required

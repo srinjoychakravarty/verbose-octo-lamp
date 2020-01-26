@@ -9,7 +9,7 @@ from uuid import uuid4
 
 class UserModel(db.Model):
   """
-  User Model
+  This class represents the user table
   """
   __tablename__ = 'users'
   # id = db.Column(UUID(as_uuid = True), primary_key = True, default = uuid4)
@@ -66,7 +66,6 @@ class UserModel(db.Model):
   def get_user_by_email(value):
     return UserModel.query.filter_by(email_address = value).first()
 
-
   # add this new method
   def __generate_hash(self, password):
     return bcrypt.generate_password_hash(password, rounds = 16)
@@ -74,20 +73,6 @@ class UserModel(db.Model):
   # add this new method
   def check_hash(self, password):
     return bcrypt.check_password_hash(self.password, password)
-
-  # def __generate_hash(self, password):
-  #   # salt = bcrypt.gensalt(16)
-  #   salt = bcrypt.gensalt(rounds = 16)
-  #   hashed_password_digest = bcrypt.hashpw(password, salt)
-  #   return hashed_password_digest.decode("utf-8")
-
- # @password.setter
- #    def password(self, password):
- #        self.password_hash = bcrypt.hashpw('password', bcrypt.gensalt()))
- #        # or whatever other hashing function you like.
-
-# def verify_password(self, password)
-#     return some_check_hash_func(self.password_hash, password)
 
   def __repr(self):
     return '<id {}>'.format(self.id)
