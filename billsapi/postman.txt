@@ -15,6 +15,13 @@ Create User POST http://127.0.0.1:5000/v1/user/
 }
 
 {
+	"first_name": "Will",
+	"last_name": "Smiths",
+	"email_address": "ssmith@yahoo.com",
+	"password": "st3ven$124A"
+}
+
+{
     "jwt_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1Nzk4MTUzNzYsImlhdCI6MTU3OTcyODk3Niwic3ViIjoiMGRmNDBjYWQtN2UyZC00MWIzLWJhNWMtNTVlNTA3Njc5YjFjIn0.qsLqlV9ovapSkTOh5rG8HTR1HVGnroTvbQS54DaiqcY"
 }
 

@@ -4,6 +4,7 @@ from flask import request, json, Response, Blueprint, g
 from ..models.UserModel import UserModel, UserSchema
 from ..shared.Authentication import Auth
 import re, uuid
+from marshmallow import ValidationError
 
 # from flask_httpauth import HTTPBasicAuth
 # from werkzeug.security import generate_password_hash, check_password_hash
@@ -59,15 +60,20 @@ def create():
           valid_password = False
       if valid_password:
           new_uuid = uuid.uuid4()
-          data = user_schema.load(req_data)
-          data.update({'id': str(new_uuid)})
-          user = UserModel(data)
-          user.save()
-          # change jwt token to basic authentication
-          ser_data = user_schema.dump(user)
-          # generate basic auth token and return as res below ???
-          token = Auth.generate_token(ser_data.get('id'))
-          return custom_response({'jwt_token': token}, 201)
+          # data = user_schema.load(req_data)
+          try:
+              # UserSchema().load(in_data)
+              data = user_schema.load(req_data)
+              data.update({'id': str(new_uuid)})
+              user = UserModel(data)
+              user.save()
+              # change jwt token to basic authentication
+              ser_data = user_schema.dump(user)
+              # generate basic auth token and return as res below ???
+              token = Auth.generate_token(ser_data.get('id'))
+              return custom_response({'jwt_token': token}, 201)
+          except ValidationError as err:
+              return custom_response(err.messages, 400)
       else:
           return custom_response({'error': password_error}, 400)
   else:
@@ -115,14 +121,18 @@ def update():
   req_data = request.get_json()
   update_attempt_list = list(req_data.keys())
   if ("account_updated" in update_attempt_list or "email_address" in update_attempt_list or "account_created" in update_attempt_list):
-      return custom_response({'error': 'you cant update email address or tamper with timestamps'}, 400)
+      return custom_response({'Bad Request [400]': 'you cant update email address or tamper with timestamps'}, 400)
   else:
-      data = user_schema.load(req_data, partial = True)
-      user = UserModel.get_one_user(g.user.get('id'))
-      user.update(data)
-      ser_user = user_schema.dump(user)
-      return custom_response(ser_user, 200)
-
+      try:
+          # UserSchema().load(in_data)
+          data = user_schema.load(req_data, partial = True)
+          user = UserModel.get_one_user(g.user.get('id'))
+          user.update(data)
+          ser_user = user_schema.dump(user)
+          return custom_response(ser_user, 204)
+      except ValidationError as err:
+          return custom_response(err.messages, 400)
+          #pprint(err.messages)
 
 @user_api.route('/self', methods = ['DELETE'])
 @Auth.auth_required
@@ -140,17 +150,22 @@ def login():
   User Login Function
   """
   req_data = request.get_json()
-  data = user_schema.load(req_data, partial = True)
-  if not data.get('email_address') or not data.get('password'):
-    return custom_response({'error': 'you need email and password to sign in'}, 400)
-  user = UserModel.get_user_by_email(data.get('email_address'))
-  if not user:
-    return custom_response({'error': 'user does not exist for given email address'}, 400)
-  if not user.check_hash(data.get('password')):
-    return custom_response({'error': 'invalid credentials: password does not match'}, 400)
-  ser_data = user_schema.dump(user)
-  token = Auth.generate_token(ser_data.get('id'))
-  return custom_response({'jwt_token': token}, 200)
+
+  try:
+    # UserSchema().load(in_data)
+    data = user_schema.load(req_data, partial = True)
+    if not data.get('email_address') or not data.get('password'):
+        return custom_response({'error': 'you need email and password to sign in'}, 400)
+    user = UserModel.get_user_by_email(data.get('email_address'))
+    if not user:
+        return custom_response({'error': 'user does not exist for given email address'}, 400)
+    if not user.check_hash(data.get('password')):
+        return custom_response({'error': 'invalid credentials: password does not match'}, 400)
+    ser_data = user_schema.dump(user)
+    token = Auth.generate_token(ser_data.get('id'))
+    return custom_response({'jwt_token': token}, 200)
+  except ValidationError as err:
+    return custom_response(err.messages, 400)
 
 def custom_response(res, status_code):
   """

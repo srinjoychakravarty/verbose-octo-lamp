@@ -1,11 +1,9 @@
 # src/models/UserModel.py
-
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, validate
 import datetime
 from . import db, bcrypt
 from uuid import uuid4
-# import sqlalchemy
-# from sqlalchemy.dialects.postgresql import UUID
+
 
 class UserModel(db.Model):
   """
@@ -79,10 +77,10 @@ class UserModel(db.Model):
 
 # add this class
 class UserSchema(Schema):
-  id = fields.Str(dump_only = True)
+  id = fields.Str(dump_only = True, validate = validate.OneOf(["read"]))
   first_name = fields.Str(required = True)
   last_name = fields.Str(required = True)
   email_address = fields.Email(required = True)
-  password = fields.Str(required = True, load_only = True)
-  account_created = fields.DateTime(dump_only = True)
-  account_updated = fields.DateTime(dump_only = True)
+  password = fields.Str(required = True, load_only = True, validate = validate.OneOf(["write"]))
+  account_created = fields.DateTime(dump_only = True, validate = validate.OneOf(["read"]))
+  account_updated = fields.DateTime(dump_only = True, validate = validate.OneOf(["read"]))
