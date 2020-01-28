@@ -58,10 +58,8 @@ def create():
           data.update({'id': str(new_uuid)})
           user = UserModel(data)
           user.save()
-          # change jwt token to basic authentication
           ser_data = user_schema.dump(user)
-          # generate basic auth token and return as res below ???
-          token = Auth.generate_token(ser_data.get('id'))
+          # token = Auth.generate_token(ser_data.get('id'))
           # return custom_response({'jwt_token': token}, 201)
           return custom_response(ser_data, 201)
       else:
@@ -70,7 +68,7 @@ def create():
       return custom_response({'Bad Request': email_error}, 400)
 
 @user_api.route('/all', methods = ['GET'])
-# @Auth.auth_required
+@auth.login_required
 def get_all():
   """
   Get all users
@@ -78,19 +76,6 @@ def get_all():
   users = UserModel.get_all_users()
   ser_users = user_schema.dump(users, many = True)
   return custom_response(ser_users, 200)
-
-# user can get any other user via their id (might need to be removed)
-@user_api.route('/<int:user_id>', methods = ['GET'])
-@Auth.auth_required
-def get_a_user(user_id):
-  """
-  Get a single user
-  """
-  user = UserModel.get_one_user(user_id)
-  if not user:
-    return custom_response({'error': 'user not found'}, 404)
-  ser_user = user_schema.dump(user)
-  return custom_response(ser_user, 200)
 
 @user_api.route('/self', methods = ['GET'])
 @auth.login_required
@@ -140,10 +125,7 @@ def login():
   """
   User Login Function
   """
-  print("START")
   req_data = request.get_json(force = True)
-  print(req_data)
-  print("END")
   data = user_schema.load(req_data, partial = True)
   if not data.get('email_address') or not data.get('password'):
       return custom_response({'error': 'you need email and password to sign in'}, 400)
