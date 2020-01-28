@@ -1,7 +1,6 @@
 #/src/views/UserView
 from flask import request, json, Response, Blueprint, g
 from flask_httpauth import HTTPBasicAuth
-from flask import jsonify
 from ..models.UserModel import UserModel, UserSchema
 from ..shared.Authentication import Auth
 import re, uuid
@@ -19,11 +18,7 @@ def create():
   Create User Function
   """
   req_data = request.get_json(force = True)
-  print("WHAT ON EARTH IS")
-  print(req_data)
-  print("REQUEST FUCKONG DATA")
-  # Verify non-email username cannot be used for account creation
-  valid_email = True
+  valid_email = True    # Verify non-email username cannot be used for account creation
   email_error = ''
   attempted_email = req_data.get('email_address')
   if len(attempted_email) < 7:
@@ -67,11 +62,12 @@ def create():
           ser_data = user_schema.dump(user)
           # generate basic auth token and return as res below ???
           token = Auth.generate_token(ser_data.get('id'))
-          return custom_response({'jwt_token': token}, 201)
+          # return custom_response({'jwt_token': token}, 201)
+          return custom_response(ser_data, 201)
       else:
-          return custom_response({'error': password_error}, 400)
+          return custom_response({'Bad Request': password_error}, 400)
   else:
-      return custom_response({'error': email_error}, 400)
+      return custom_response({'Bad Request': email_error}, 400)
 
 @user_api.route('/all', methods = ['GET'])
 # @Auth.auth_required
@@ -169,10 +165,6 @@ def custom_response(res, status_code):
     response = json.dumps(res),
     status = status_code
   )
-
- # email_address_to_authenticate = input_request.get('email_address')
-
-
 
 @auth.verify_password
 def authenticate(username, password):
