@@ -27,6 +27,14 @@ Create User POST http://127.0.0.1:5000/v1/user/
 
                   eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1Nzk4MTU3OTgsImlhdCI6MTU3OTcyOTM5OCwic3ViIjoiMGRmNDBjYWQtN2UyZC00MWIzLWJhNWMtNTVlNTA3Njc5YjFjIn0.x6iCr9cU3zCt8BYYttxNtYRomW_Rsx4bYPoS5UPhJsM
 
+{
+	"first_name": "Jason",
+	"last_name": "Roy",
+	"email_address": "jason.roy@gmail.com",
+	"password": "jasonRoy$123"
+}
+
+
 Login POST http://127.0.0.1:5000/v1/user/login
 {
 	"email_address": "maeve@wiley.com",
@@ -40,3 +48,16 @@ Login POST http://127.0.0.1:5000/v1/user/login
 }
 
 Get Self GET http://127.0.0.1:5000/v1/user/self
+
+
+{
+	"first_name": "Denmakr",
+	"last_name": "Eriksen",
+	"email_address": "inter@milan.com",
+	"password": "Erik$en123"
+}
+
+Update Self Put http://127.0.0.1:5000/v1/user/self
+{
+	"first_name": "Christian"
+}
